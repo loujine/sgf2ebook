@@ -1,0 +1,28 @@
+<?xml version='1.0' encoding='utf-8'?>
+<package xmlns="http://www.idpf.org/2007/opf" version="2.0" unique-identifier="uuid_id">
+  <metadata
+      xmlns:opf="http://www.idpf.org/2007/opf"
+      xmlns:dc="http://purl.org/dc/elements/1.1/"
+      xmlns:dcterms="http://purl.org/dc/terms/"
+      xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+    <dc:title>{{ title }}</dc:title>
+    <dc:language>en</dc:language>
+    <dc:identifier id="uuid_id" opf:scheme="uuid">{{ UUID }}</dc:identifier>
+    <dc:creator>{{ creator }}</dc:creator>
+  </metadata>
+  <manifest>
+    <item id="ncx" href="toc.ncx" media-type="application/x-dtbncx+xml" />
+    <item id="css" href="Styles/stylesheet.css" media-type="text/css" />
+    {% for move, path in enumerate(svgpath, 1) -%}
+    <item id="page_{{ '{:03}'.format(move) }}" href="Text/page_{{ '{:03}'.format(move) }}.html" media-type="application/xhtml+xml" />
+    {% endfor -%}
+    {% for move, path in enumerate(svgpath, 1) -%}
+    <item id="diagram_{{ '{:03}'.format(move) }}" href="Images/{{ path.name }}" media-type="image/svg+xml" />
+    {% endfor -%}
+  </manifest>
+  <spine toc="ncx">
+    {% for move, path in enumerate(svgpath, 1) -%}
+    <itemref idref="page_{{ '{:03}'.format(move) }}" />
+    {% endfor -%}
+  </spine>
+</package>

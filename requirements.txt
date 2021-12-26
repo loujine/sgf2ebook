@@ -1,0 +1,4 @@
+Jinja2==3.0.3
+MarkupSafe==2.0.1
+numpy==1.21.5
+sente==0.3.1
