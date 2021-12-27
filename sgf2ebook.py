@@ -57,7 +57,12 @@ def main(sgfpath: Path, output_path: Path) -> None:
                 '-o', svgdirpath.joinpath(svgpath),
             ])
             # create HTML page with SVG element
-            content = template.render(title=sgfpath.stem, svgpath=svgpath)
+            content = template.render(
+                title=sgfpath.stem,
+                svgpath=svgpath,
+                info=load_sgf(sgfpath)['metadata'],
+                last_flag=(move == nb_moves),
+            )
             with Path(tmpdir, 'EPUB', 'Text', f'page_{move:03}.html').open('w') as fd:
                 fd.write(content)
 
