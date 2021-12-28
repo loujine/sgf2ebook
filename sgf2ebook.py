@@ -21,10 +21,17 @@ TEMPLATEDIR = Path(__file__, '..', 'epub_template').resolve()
 
 def load_sgf(sgfpath: Path):
     game = sgf.load(str(sgfpath))
+    comments = {}
+    seq = game.get_default_sequence()
+    for idx, move in enumerate(seq, 1):
+        game.play(move)
+        if game.comment:
+            comments[idx] = game.comment
     return {
         # read only main sequence, not variations
-        'nb_moves': len(game.get_all_sequences()[0]),
+        'nb_moves': len(seq),
         'metadata': game.get_properties(),
+        'comments': comments,
     }
 
 
@@ -34,6 +41,7 @@ def main(sgfpath: Path, output_path: Path) -> None:
     sgf_content = load_sgf(sgfpath)
     nb_moves = sgf_content['nb_moves']
     metadata = sgf_content['metadata']
+    comments = sgf_content['comments']
 
     uuid = uuid4()
 
@@ -64,6 +72,7 @@ def main(sgfpath: Path, output_path: Path) -> None:
                 svgpath=svgpath,
                 info=metadata,
                 last_flag=(move == nb_moves),
+                comment=comments.get(move, ''),
             )
             with Path(tmpdir, 'EPUB', 'Text', f'page_{move:03}.html').open('w') as fd:
                 fd.write(html_content)
