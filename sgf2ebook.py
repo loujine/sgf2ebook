@@ -31,7 +31,9 @@ def load_sgf(sgfpath: Path):
 def main(sgfpath: Path, output_path: Path) -> None:
     print()
     print(f'Load content of {sgfpath}')
-    nb_moves = load_sgf(sgfpath)['nb_moves']
+    sgf_content = load_sgf(sgfpath)
+    nb_moves = sgf_content['nb_moves']
+    metadata = sgf_content['metadata']
 
     uuid = uuid4()
 
@@ -57,20 +59,20 @@ def main(sgfpath: Path, output_path: Path) -> None:
                 '-o', svgdirpath.joinpath(svgpath),
             ])
             # create HTML page with SVG element
-            content = template.render(
+            html_content = template.render(
                 title=sgfpath.stem,
                 svgpath=svgpath,
-                info=load_sgf(sgfpath)['metadata'],
+                info=metadata,
                 last_flag=(move == nb_moves),
             )
             with Path(tmpdir, 'EPUB', 'Text', f'page_{move:03}.html').open('w') as fd:
-                fd.write(content)
+                fd.write(html_content)
 
         # Declare all HTML/SVG files in master file
         print('Prepare content.opf file')
         template = jinja2.Template(
             TEMPLATEDIR.joinpath('EPUB', 'content.opf').open().read())
-        content = template.render(
+        opf_content = template.render(
             title=sgfpath.stem,
             creator='sgf2ebook',
             UUID=uuid,
@@ -78,24 +80,25 @@ def main(sgfpath: Path, output_path: Path) -> None:
             enumerate=enumerate,
         )
         with Path(tmpdir, 'EPUB', 'content.opf').open('w') as fd:
-            fd.write(content)
+            fd.write(opf_content)
 
         # Generate table of contents
         print('Prepare table of contents')
         template = jinja2.Template(
             TEMPLATEDIR.joinpath('EPUB', 'toc.ncx').open().read())
-        content = template.render(
+        toc_content = template.render(
             title=sgfpath.stem,
             UUID=uuid,
             nb_moves=nb_moves,
             range=range,
         )
         with Path(tmpdir, 'EPUB', 'toc.ncx').open('w') as fd:
-            fd.write(content)
+            fd.write(toc_content)
 
         # zip all content in EPUB file
         output_path.mkdir(exist_ok=True, parents=True)
-        with ZipFile(output_path.joinpath(f'{sgfpath.stem}.epub'), 'w') as zf:
+        output_name = f"{metadata.get('EV', 'unknown_event')}{'_' if 'RO' in metadata else ''}{metadata.get('RO', '')}.epub".replace(' ', '_')
+        with ZipFile(output_path.joinpath(output_name), 'w') as zf:
             os.chdir(tmpdir)
             # "The first file in the OCF ZIP Container MUST be the mimetype file"
             zf.write('mimetype')
@@ -104,7 +107,7 @@ def main(sgfpath: Path, output_path: Path) -> None:
                     if file != 'mimetype':
                         zf.write(Path(root, file))
             os.chdir(Path(__file__).parent)
-    print(f'{sgfpath.stem}.epub generated')
+    print(f'{output_path.joinpath(output_name)} generated')
 
 
 if __name__ == "__main__":
