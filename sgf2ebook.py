@@ -66,6 +66,13 @@ def main(sgfpath: Path, output_path: Path) -> None:
                 '--style', 'minimalist',
                 '-o', svgdirpath.joinpath(svgpath),
             ])
+
+            # replace move number in SVG
+            # not possible directly in sgf-render invocation at the moment
+            svg_content = svgdirpath.joinpath(svgpath).open().read()
+            svgdirpath.joinpath(svgpath).open('w').write(
+                svg_content.replace('>1<', f'>{move}<', 1))
+
             # create HTML page with SVG element
             html_content = template.render(
                 title=sgfpath.stem,
