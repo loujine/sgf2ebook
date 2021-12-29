@@ -10,7 +10,7 @@ from uuid import uuid4
 from zipfile import ZipFile
 
 import jinja2
-from sente import sgf  # type: ignore
+import sente  # type: ignore
 
 __version__ = (1, 0, 0)
 
@@ -20,7 +20,7 @@ TEMPLATEDIR = Path(__file__, '..', 'epub_template').resolve()
 
 
 def load_sgf(sgfpath: Path):
-    game = sgf.load(str(sgfpath))
+    game = sente.sgf.load(str(sgfpath))
     comments = {}
     seq = game.get_default_sequence()
     for idx, move in enumerate(seq, 1):
@@ -38,7 +38,12 @@ def load_sgf(sgfpath: Path):
 def main(sgfpath: Path, output_path: Path) -> None:
     print()
     print(f'Load content of {sgfpath}')
-    sgf_content = load_sgf(sgfpath)
+    try:
+        sgf_content = load_sgf(sgfpath)
+    except (sente.exceptions.InvalidSGFException,
+            sente.exceptions.IllegalMoveException):
+        print(f'Could not read {sgfpath}, skipping')
+        return
     nb_moves = sgf_content['nb_moves']
     metadata = sgf_content['metadata']
     comments = sgf_content['comments']
@@ -57,15 +62,19 @@ def main(sgfpath: Path, output_path: Path) -> None:
         for move in range(1, nb_moves + 1):
             svgpath = f'diagram_{move:03}.svg'
             # generate SVG files with sgf-render
-            subprocess.check_call([
-                SGF_RENDER_EXECUTABLE,
-                str(sgfpath),
-                '--move-numbers',
-                '--first-move-number', str(move),
-                '-n', str(move),
-                '--style', 'minimalist',
-                '-o', svgdirpath.joinpath(svgpath),
-            ])
+            try:
+                subprocess.check_call([
+                    SGF_RENDER_EXECUTABLE,
+                    str(sgfpath),
+                    '--move-numbers',
+                    '--first-move-number', str(move),
+                    '-n', str(move),
+                    '--style', 'minimalist',
+                    '-o', svgdirpath.joinpath(svgpath),
+                ])
+            except subprocess.CalledProcessError:
+                print(f'Move {move} could not be converted to SVG')
+                continue
 
             # replace move number in SVG
             # not possible directly in sgf-render invocation at the moment
