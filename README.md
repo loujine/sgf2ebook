@@ -39,9 +39,10 @@ Todo list
 ---------
 
 Possible improvements, in order of my personal priorities, include:
-* adding the game metadata on the first page
-* adding internal links to jump 1/10/50 moves
-* adding support for variation sequences
-* adding a book cover
+* [X] adding the game metadata on the first page
+* [X] adding move comments
+* [ ] adding internal links to jump 1/10/50 moves
+* [ ] adding support for variation sequences
+* [ ] adding a book cover
 
 But given my limited time, don't expect anything.
