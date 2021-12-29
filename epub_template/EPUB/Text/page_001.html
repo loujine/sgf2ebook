@@ -10,15 +10,18 @@
     <div>
       <img src="../Images/{{ svgpath }}" alt="{{ svgpath }}" />
     </div>
+    {% if first_flag -%}
     <div>
-      {% if not last_flag -%}
       Event: {{ info['EV'] }} / Round {{ info['RO'] }} / Date: {{ info['DT'] }}
       <br />
       Black: {{ info['PB'] }} / White: {{ info['PW'] }}
-      {% else -%}
-      Result: {{ info['RE'] }}
-      {% endif -%}
     </div>
+    {% endif -%}
+    {% if last_flag -%}
+    <div>
+      Result: {{ info['RE'] }}
+    </div>
+    {% endif -%}
     <div>
       {{ comment }}
     </div>

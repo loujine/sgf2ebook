@@ -87,6 +87,7 @@ def main(sgfpath: Path, output_path: Path) -> None:
                 title=sgfpath.stem,
                 svgpath=svgpath,
                 info=metadata,
+                first_flag=(move == 1),
                 last_flag=(move == nb_moves),
                 comment=comments.get(move, ''),
             )
