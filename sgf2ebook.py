@@ -142,4 +142,4 @@ if __name__ == "__main__":
         main(path, outpath)
     if path.is_dir():
         for filepath in sorted(path.rglob('*.sgf')):
-            main(filepath, outpath)
+            main(filepath, outpath.joinpath(filepath.parent.relative_to(path)))
